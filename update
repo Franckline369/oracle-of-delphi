@@ -1,0 +1,26 @@
+module price_feed {
+    struct Price {
+        u128 price;
+        u64 confidence;
+        u64 timestamp;
+    }
+
+    public(spec) struct PriceFeed has key {
+        mapping<vector<u8>, Price> prices;
+    }
+
+    public entry fun update_price(account: &signer, pair: vector<u8>, price: u128, confidence: u64) {
+        let price_feed = borrow_global<PriceFeed>(account);
+        let price_info = Price {
+            price: price,
+            confidence: confidence,
+            timestamp: timestamp(),
+        };
+        price_feed.prices[pair] = price_info;
+    }
+
+    public fun get_price(account: &signer, pair: vector<u8>): Price {
+        let price_feed = borrow_global<PriceFeed>(account);
+        return price_feed.prices[pair];
+    }
+}
